@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>staticfiles — CDN Static Assets</title>
+  <meta name="description" content="CDN-like personal repository for public static assets: icons, profile pictures and more." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="container">
+      <a class="logo" href="index.html">static<span>files</span></a>
+      <p class="tagline">CDN-like personal static asset host · GitHub Pages</p>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main>
+    <div class="container">
+
+      <!-- Hero -->
+      <section class="hero">
+        <h1>Public Static Assets</h1>
+        <p>Browse and copy direct URLs to icons, profile pictures, and other static files hosted via GitHub Pages.</p>
+        <div class="base-url-box">
+          <span>Base URL:</span>
+          <code>https://astronautmarkus.github.io/staticfiles/</code>
+        </div>
+      </section>
+
+      <!-- Icons section -->
+      <section class="section" id="icons">
+        <div class="section-header">
+          <h2>Icons</h2>
+          <span class="badge" id="icons-count">0</span>
+        </div>
+        <div class="asset-grid" id="icons-grid">
+          <!-- Cards are injected by JavaScript when assets are added.
+               While the grid is empty, the placeholder below is shown. -->
+          <p class="empty-state">No icons yet — add image files to <code>assets/icons/</code>.</p>
+        </div>
+      </section>
+
+      <!-- Profile pictures section -->
+      <section class="section" id="profile">
+        <div class="section-header">
+          <h2>Profile Pictures</h2>
+          <span class="badge" id="profile-count">0</span>
+        </div>
+        <div class="asset-grid" id="profile-grid">
+          <p class="empty-state">No profile pictures yet — add image files to <code>assets/profile/</code>.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="container">
+      <p>
+        Hosted on <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a> ·
+        <a href="https://github.com/AstronautMarkus/staticfiles" target="_blank" rel="noopener">View on GitHub</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- ── Asset registry ────────────────────────────────────────────────────
+       To add a new asset, append an entry to the ASSETS array below and
+       drop the file into the matching directory.
+
+       Format:
+         { section: "icons" | "profile", file: "filename.ext" }
+
+       The URL is built automatically as:
+         https://astronautmarkus.github.io/staticfiles/assets/<section>/<file>
+  ──────────────────────────────────────────────────────────────────────── -->
+  <script>
+    const BASE_URL = "https://astronautmarkus.github.io/staticfiles/";
+
+    /**
+     * Add entries here as you upload new files.
+     * @type {{ section: string, file: string }[]}
+     */
+    const ASSETS = [
+      // Example (uncomment and replace with your real files):
+      // { section: "icons",   file: "logo.png" },
+      // { section: "profile", file: "avatar.jpg" },
+    ];
+
+    // ── Render ──────────────────────────────────────────────────────────
+
+    function buildCard(section, file) {
+      const url = BASE_URL + "assets/" + section + "/" + file;
+      const card = document.createElement("div");
+      card.className = "asset-card";
+      card.innerHTML = `
+        <img class="preview" src="assets/${section}/${file}" alt="${file}" loading="lazy" />
+        <p class="asset-name">${file}</p>
+        <p class="asset-url">${url}</p>
+        <button class="copy-btn" data-url="${url}">Copy URL</button>
+      `;
+      return card;
+    }
+
+    function renderSection(sectionId) {
+      const grid  = document.getElementById(sectionId + "-grid");
+      const badge = document.getElementById(sectionId + "-count");
+      const items = ASSETS.filter(a => a.section === sectionId);
+
+      badge.textContent = items.length;
+
+      if (items.length === 0) return; // keep the empty-state placeholder
+
+      grid.innerHTML = ""; // remove placeholder
+      items.forEach(a => grid.appendChild(buildCard(a.section, a.file)));
+    }
+
+    renderSection("icons");
+    renderSection("profile");
+
+    // ── Copy-to-clipboard ───────────────────────────────────────────────
+
+    document.addEventListener("click", function (e) {
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+
+      const url = btn.dataset.url;
+      navigator.clipboard.writeText(url).then(function () {
+        const original = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.classList.add("copied");
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 2000);
+      }).catch(function () {
+        btn.textContent = "Copy failed";
+        setTimeout(function () { btn.textContent = "Copy URL"; }, 2000);
+      });
+    });
+  </script>
+
+</body>
+</html>
